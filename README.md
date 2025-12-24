@@ -38,3 +38,7 @@ npm run build
 npm install axios
 npm install element-plus --save
 ```
+## 运行效果
+http://localhost:5173/project
+
+![运行效果截图](src/assets/image.png)
