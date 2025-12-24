@@ -330,8 +330,8 @@ onMounted(() => {
   </el-table>
   
   <!-- 新增/修改项目弹窗 -->
-  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="500px">
-    <el-form :model="projectForm" :rules="rules" ref="projectFormRef" label-width="100px">
+  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="600px">
+    <el-form :model="projectForm" :rules="rules" ref="projectFormRef" label-width="120px">
       <el-form-item label="项目编码" prop="projectCode">
         <el-input v-model="projectForm.projectCode" :disabled="formType === 'edit'" />
       </el-form-item>
@@ -345,6 +345,7 @@ onMounted(() => {
           placeholder="选择日期"
           format="YYYY-MM-DD"
           value-format="YYYY-MM-DD"
+          style="width: 100%"
         />
       </el-form-item>
       <el-form-item label="计划结束日期" prop="planEndDate">
@@ -354,6 +355,7 @@ onMounted(() => {
           placeholder="选择日期"
           format="YYYY-MM-DD"
           value-format="YYYY-MM-DD"
+          style="width: 100%"
         />
       </el-form-item>
       <el-form-item label="项目地址">
