@@ -7,7 +7,7 @@ import { View } from '@element-plus/icons-vue'
 
 const tableData = reactive({projectList:[]})
 
-const dataSize = ref('1')
+const dataSize = ref('6')
 
 // 表格引用，用于多选功能
 const multipleTableRef = ref<InstanceType<typeof ElTable>>()
