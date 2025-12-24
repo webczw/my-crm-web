@@ -1,7 +1,49 @@
 <script lang="ts" setup>
-import { reactive, ref, onMounted } from 'vue'
+import { reactive, ref, onMounted, nextTick } from 'vue'
 import axios from 'axios'
 import { ElLoading,ElMessage, ElMessageBox, ElTable } from 'element-plus'
+import { View } from '@element-plus/icons-vue'
+
+// 拖拽指令
+const vDialogDrag = {
+  mounted(el: HTMLElement) {
+    nextTick(() => {
+      const dialogHeaderEl = el.querySelector('.el-dialog__header') as HTMLElement
+      const dragDom = el.querySelector('.el-dialog') as HTMLElement
+      
+      if (!dialogHeaderEl || !dragDom) {
+        return
+      }
+      
+      dialogHeaderEl.style.cssText += ';cursor:move;user-select:none;'
+      
+      dialogHeaderEl.onmousedown = (e: MouseEvent) => {
+        // 鼠标按下，记录当前位置
+        const rect = dragDom.getBoundingClientRect()
+        const offsetX = e.clientX - rect.left
+        const offsetY = e.clientY - rect.top
+        
+        const mousemove = (e: MouseEvent) => {
+          const left = e.clientX - offsetX
+          const top = e.clientY - offsetY
+          
+          dragDom.style.left = left + 'px'
+          dragDom.style.top = top + 'px'
+          dragDom.style.marginLeft = '0'
+          dragDom.style.marginTop = '0'
+        }
+        
+        const mouseup = () => {
+          document.removeEventListener('mousemove', mousemove)
+          document.removeEventListener('mouseup', mouseup)
+        }
+        
+        document.addEventListener('mousemove', mousemove)
+        document.addEventListener('mouseup', mouseup)
+      }
+    })
+  }
+}
 
 
 const tableData = reactive({projectList:[]})
@@ -18,6 +60,16 @@ const multipleSelection = ref([])
 const dialogFormVisible = ref(false)
 const dialogTitle = ref('')
 const formType = ref('') // 'add' 或 'edit'
+
+// 查看详情弹窗
+const dialogDetailVisible = ref(false)
+const projectDetail = reactive({
+  projectCode: '',
+  projectName: '',
+  planStartDate: '',
+  planEndDate: '',
+  projectAddress: ''
+})
 
 // 表单引用
 const projectFormRef = ref()
@@ -118,6 +170,13 @@ const openEditDialog = (row: any, index: number) => {
   // 填充表单数据
   Object.assign(projectForm, row)
   dialogFormVisible.value = true
+}
+
+// 打开查看项目详情弹窗
+const openDetailDialog = (row: any) => {
+  // 填充详情数据
+  Object.assign(projectDetail, row)
+  dialogDetailVisible.value = true
 }
 
 // 删除项目
@@ -321,8 +380,9 @@ onMounted(() => {
     <el-table-column prop="planStartDate" label="计划开始日期" width="180" />
     <el-table-column prop="planEndDate" label="计划结束日期" width="180" />
     <el-table-column prop="projectAddress" label="项目地址" />
-    <el-table-column label="操作" width="200">
+    <el-table-column label="操作" width="250">
       <template #default="{ row, $index }">
+        <el-button size="small" :icon="View" @click="openDetailDialog(row)">查看</el-button>
         <el-button size="small" @click="openEditDialog(row, $index)">修改</el-button>
         <el-button size="small" type="danger" @click="deleteProject(row, $index)">删除</el-button>
       </template>
@@ -330,7 +390,7 @@ onMounted(() => {
   </el-table>
   
   <!-- 新增/修改项目弹窗 -->
-  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="600px">
+  <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="600px" v-dialog-drag>
     <el-form :model="projectForm" :rules="rules" ref="projectFormRef" label-width="120px">
       <el-form-item label="项目编码" prop="projectCode">
         <el-input v-model="projectForm.projectCode" :disabled="formType === 'edit'" />
@@ -366,6 +426,32 @@ onMounted(() => {
       <span class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
+  
+  <!-- 查看项目详情弹窗 -->
+  <el-dialog v-model="dialogDetailVisible" title="项目详情" width="600px" v-dialog-drag>
+    <el-descriptions :column="1" border>
+      <el-descriptions-item label="项目编码">
+        {{ projectDetail.projectCode }}
+      </el-descriptions-item>
+      <el-descriptions-item label="项目名称">
+        {{ projectDetail.projectName }}
+      </el-descriptions-item>
+      <el-descriptions-item label="计划开始日期">
+        {{ projectDetail.planStartDate }}
+      </el-descriptions-item>
+      <el-descriptions-item label="计划结束日期">
+        {{ projectDetail.planEndDate }}
+      </el-descriptions-item>
+      <el-descriptions-item label="项目地址">
+        {{ projectDetail.projectAddress }}
+      </el-descriptions-item>
+    </el-descriptions>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="dialogDetailVisible = false">关闭</el-button>
       </span>
     </template>
   </el-dialog>
