@@ -19,6 +19,9 @@ const dialogFormVisible = ref(false)
 const dialogTitle = ref('')
 const formType = ref('') // 'add' 或 'edit'
 
+// 表单引用
+const projectFormRef = ref()
+
 // 表单数据
 const projectForm = reactive({
   projectCode: '',
@@ -26,6 +29,24 @@ const projectForm = reactive({
   planStartDate: '',
   planEndDate: '',
   projectAddress: ''
+})
+
+// 表单验证规则
+const rules = reactive({
+  projectCode: [
+    { required: true, message: '请输入项目编码', trigger: 'blur' },
+    { min: 1, max: 50, message: '项目编码长度应在1-50之间', trigger: 'blur' }
+  ],
+  projectName: [
+    { required: true, message: '请输入项目名称', trigger: 'blur' },
+    { min: 1, max: 100, message: '项目名称长度应在1-100之间', trigger: 'blur' }
+  ],
+  planStartDate: [
+    { required: true, message: '请选择计划开始日期', trigger: 'change' }
+  ],
+  planEndDate: [
+    { required: true, message: '请选择计划结束日期', trigger: 'change' }
+  ]
 })
 
 // 当前编辑的项目索引
@@ -202,6 +223,12 @@ const batchDeleteProjects = async () => {
 
 // 提交表单
 const submitForm = async () => {
+  // 验证表单
+  const valid = await projectFormRef.value.validate().catch(() => false)
+  if (!valid) {
+    return
+  }
+  
   try {
     let response
     if (formType.value === 'add') {
@@ -304,14 +331,14 @@ onMounted(() => {
   
   <!-- 新增/修改项目弹窗 -->
   <el-dialog v-model="dialogFormVisible" :title="dialogTitle" width="500px">
-    <el-form :model="projectForm" label-width="100px">
-      <el-form-item label="项目编码">
+    <el-form :model="projectForm" :rules="rules" ref="projectFormRef" label-width="100px">
+      <el-form-item label="项目编码" prop="projectCode">
         <el-input v-model="projectForm.projectCode" :disabled="formType === 'edit'" />
       </el-form-item>
-      <el-form-item label="项目名称">
+      <el-form-item label="项目名称" prop="projectName">
         <el-input v-model="projectForm.projectName" />
       </el-form-item>
-      <el-form-item label="计划开始日期">
+      <el-form-item label="计划开始日期" prop="planStartDate">
         <el-date-picker
           v-model="projectForm.planStartDate"
           type="date"
@@ -320,7 +347,7 @@ onMounted(() => {
           value-format="YYYY-MM-DD"
         />
       </el-form-item>
-      <el-form-item label="计划结束日期">
+      <el-form-item label="计划结束日期" prop="planEndDate">
         <el-date-picker
           v-model="projectForm.planEndDate"
           type="date"
