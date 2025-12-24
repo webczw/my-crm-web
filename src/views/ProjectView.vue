@@ -265,7 +265,7 @@ onMounted(() => {
 <template>
   <el-row :gutter="10" style="margin-bottom: 10px;">
     <el-col :span="4">
-      <el-input v-model="dataSize" placeholder="请输入数据量" lable="是是是"/>
+      <el-input v-model="dataSize" placeholder="请输入数据量"/>
     </el-col>
     <el-col :span="20">
       <el-button type="primary" @click="search">搜索</el-button>
