@@ -2,6 +2,7 @@
 import { reactive, ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElLoading,ElMessage, ElMessageBox, ElTable } from 'element-plus'
+import { View } from '@element-plus/icons-vue'
 
 
 const tableData = reactive({projectList:[]})
@@ -18,6 +19,16 @@ const multipleSelection = ref([])
 const dialogFormVisible = ref(false)
 const dialogTitle = ref('')
 const formType = ref('') // 'add' 或 'edit'
+
+// 查看弹窗相关
+const viewDialogVisible = ref(false)
+const viewData = reactive({
+  projectCode: '',
+  projectName: '',
+  planStartDate: '',
+  planEndDate: '',
+  projectAddress: ''
+})
 
 // 表单引用
 const projectFormRef = ref()
@@ -118,6 +129,13 @@ const openEditDialog = (row: any, index: number) => {
   // 填充表单数据
   Object.assign(projectForm, row)
   dialogFormVisible.value = true
+}
+
+// 打开查看项目弹窗
+const openViewDialog = (row: any) => {
+  // 填充查看数据
+  Object.assign(viewData, row)
+  viewDialogVisible.value = true
 }
 
 // 删除项目
@@ -321,8 +339,9 @@ onMounted(() => {
     <el-table-column prop="planStartDate" label="计划开始日期" width="180" />
     <el-table-column prop="planEndDate" label="计划结束日期" width="180" />
     <el-table-column prop="projectAddress" label="项目地址" />
-    <el-table-column label="操作" width="200">
+    <el-table-column label="操作" width="250">
       <template #default="{ row, $index }">
+        <el-button size="small" :icon="View" @click="openViewDialog(row)" title="查看"></el-button>
         <el-button size="small" @click="openEditDialog(row, $index)">修改</el-button>
         <el-button size="small" type="danger" @click="deleteProject(row, $index)">删除</el-button>
       </template>
@@ -366,6 +385,32 @@ onMounted(() => {
       <span class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取消</el-button>
         <el-button type="primary" @click="submitForm">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
+
+  <!-- 查看项目弹窗 -->
+  <el-dialog v-model="viewDialogVisible" title="查看项目" width="600px">
+    <el-form :model="viewData" label-width="120px">
+      <el-form-item label="项目编码">
+        <el-input v-model="viewData.projectCode" disabled />
+      </el-form-item>
+      <el-form-item label="项目名称">
+        <el-input v-model="viewData.projectName" disabled />
+      </el-form-item>
+      <el-form-item label="计划开始日期">
+        <el-input v-model="viewData.planStartDate" disabled />
+      </el-form-item>
+      <el-form-item label="计划结束日期">
+        <el-input v-model="viewData.planEndDate" disabled />
+      </el-form-item>
+      <el-form-item label="项目地址">
+        <el-input v-model="viewData.projectAddress" disabled />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button type="primary" @click="viewDialogVisible = false">关闭</el-button>
       </span>
     </template>
   </el-dialog>
